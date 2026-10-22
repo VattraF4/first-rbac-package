@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Vattra\Rbac\Commands\InstallCommand;
 use Vattra\Rbac\Commands\SeedCommand;
 use Vattra\Rbac\Commands\MigrateCommand;
+use Vattra\Rbac\Commands\CheckSetupCommand;
 use Vattra\Rbac\Commands\AssignRoleCommand;
 use Vattra\Rbac\Commands\SyncPermissionsCommand;
 use Vattra\Rbac\Services\PermissionRegistrar;
@@ -54,6 +55,7 @@ class RbacServiceProvider extends ServiceProvider
                 SeedCommand::class,
                 AssignRoleCommand::class,
                 SyncPermissionsCommand::class,
+                CheckSetupCommand::class,
             ]);
         }
     }

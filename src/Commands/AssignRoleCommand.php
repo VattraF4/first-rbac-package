@@ -29,14 +29,14 @@ class AssignRoleCommand extends Command
      */
     public function handle(): int
     {
-        $userId = $this->argument('userID') ?? $this->argument('user');
-        $roleId  = $this->argument('roleID') ?? $this->argument('role');
+        $userInput = $this->argument('user');
+        $roleName  = $this->argument('role');
 
         // 1. Resolve the role
-        $role = Role::where('name', $roleId)->first();
+        $role = Role::where('name', $roleName)->first();
 
         if (! $role) {
-            $this->error("❌ Role [{$roleId}] does not exist.");
+            $this->error("❌ Role [{$roleName}] does not exist.");
             $available = Role::pluck('name')->implode(', ');
             if ($available) {
                 $this->line("   Available roles: {$available}");
@@ -47,12 +47,12 @@ class AssignRoleCommand extends Command
         // 2. Resolve the user (by ID or email)
         $userModel = config('auth.providers.users.model', \App\Models\User::class);
 
-        $user = is_numeric($userId)
-            ? $userModel::find($userId)
-            : $userModel::where('email', $userId)->first();
+        $user = is_numeric($userInput)
+            ? $userModel::find($userInput)
+            : $userModel::where('email', $userInput)->first();
 
         if (! $user) {
-            $this->error("❌ User [{$userId}] not found.");
+            $this->error("❌ User [{$userInput}] not found.");
             return self::FAILURE;
         }
 

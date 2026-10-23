@@ -16,7 +16,7 @@ Fast, config-driven role-based access control for Laravel 10, 11, 12 and 13.
 ```bash
 composer require vattra/laravel-rbac
 
-php artisan vendor:publish --tag=rbac-config   # optional but recommended
+php artisan vendor:publish --tag=rbac          # optional but recommended
 php artisan migrate                            # migrations load from the package
 php artisan rbac:install                       # sync roles + permissions from config
 php artisan rbac:check                         # verify the setup
@@ -39,18 +39,18 @@ Publish tags: `rbac-config`, `rbac-migrations`, and `rbac` (both).
 
 `config/rbac.php` (generic defaults: `super_admin`, `admin`, `editor`, `user`).
 
-| Key | Purpose |
-| --- | --- |
-| `super_admin_role` | Role that bypasses every permission/role check (default `super_admin`) |
-| `admin_role` | Used by the `is_admin` gate and `*except_rbac` (default `admin`) |
-| `user_model` | User class; `null` falls back to `auth.providers.users.model` (`RBAC_USER_MODEL` env) |
-| `user_table`, `user_foreign_key`, `user_key_type` | Users table, pivot column, `id` / `uuid` / `ulid` |
-| `tables.*` | Names of the five tables |
-| `cache.enabled`, `cache.ttl`, `cache.store`, `cache.prefix` | Persistent cache (`RBAC_CACHE` env) |
-| `register_role_gates` | Define an `is_<role>` gate per configured role |
-| `legacy_middleware_aliases` | Also register `role` / `permission` aliases |
-| `roles` | Role definitions (see below) |
-| `rbac_protected_permissions` | Excluded from the `*except_rbac` wildcard |
+| Key                                                         | Purpose                                                                               |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `super_admin_role`                                          | Role that bypasses every permission/role check (default `super_admin`)                |
+| `admin_role`                                                | Used by the `is_admin` gate and `*except_rbac` (default `admin`)                      |
+| `user_model`                                                | User class; `null` falls back to `auth.providers.users.model` (`RBAC_USER_MODEL` env) |
+| `user_table`, `user_foreign_key`, `user_key_type`           | Users table, pivot column, `id` / `uuid` / `ulid`                                     |
+| `tables.*`                                                  | Names of the five tables                                                              |
+| `cache.enabled`, `cache.ttl`, `cache.store`, `cache.prefix` | Persistent cache (`RBAC_CACHE` env)                                                   |
+| `register_role_gates`                                       | Define an `is_<role>` gate per configured role                                        |
+| `legacy_middleware_aliases`                                 | Also register `role` / `permission` aliases                                           |
+| `roles`                                                     | Role definitions (see below)                                                          |
+| `rbac_protected_permissions`                                | Excluded from the `*except_rbac` wildcard                                             |
 
 ```php
 'roles' => [
@@ -63,7 +63,7 @@ Publish tags: `rbac-config`, `rbac-migrations`, and `rbac` (both).
 Permission names follow `<action>_<group>`; the group is the last `_` segment
 (`view_blog_posts` -> `posts`). `locked` roles cannot be deleted.
 
-**UUID users / custom tables.** Set these *before* running `php artisan migrate`:
+**UUID users / custom tables.** Set these _before_ running `php artisan migrate`:
 
 ```php
 'user_table' => 'members',
@@ -132,7 +132,7 @@ $user->can('view_posts');
 @can('view_posts') ... @endcan
 ```
 
-The package's `Gate::before` only ever *grants*. It does nothing for guests, and it
+The package's `Gate::before` only ever _grants_. It does nothing for guests, and it
 **never overrides a policy**: when a policy applies to the arguments (e.g.
 `Gate::allows('view_posts', $post)` and `Post` has a policy) the policy decides. The
 super admin bypasses everything that isn't governed by a policy.
@@ -164,13 +164,13 @@ call `Rbac::flushCache()`.
 
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| `rbac:install` | Create/sync roles and permissions from config |
-| `rbac:seed` | Alias for `rbac:install` |
-| `rbac:sync-permissions` | Alias for `rbac:install` |
-| `rbac:assign-role {user} {role} [--sync]` | Assign a role by key or email (uses `rbac.user_model`) |
-| `rbac:check` | Verify tables, user model, gates, seeded roles (non-zero exit on problems) |
+| Command                                   | Description                                                                |
+| ----------------------------------------- | -------------------------------------------------------------------------- |
+| `rbac:install`                            | Create/sync roles and permissions from config                              |
+| `rbac:seed`                               | Alias for `rbac:install`                                                   |
+| `rbac:sync-permissions`                   | Alias for `rbac:install`                                                   |
+| `rbac:assign-role {user} {role} [--sync]` | Assign a role by key or email (uses `rbac.user_model`)                     |
+| `rbac:check`                              | Verify tables, user model, gates, seeded roles (non-zero exit on problems) |
 
 `rbac:install` is the source of truth for configured roles: it **re-syncs each
 configured role's permissions**, replacing any changes made to them in the database.

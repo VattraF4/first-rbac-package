@@ -1,18 +1,39 @@
 <?php
-// src/Middleware/RoleMiddleware.php
+
+declare(strict_types=1);
+
 namespace Vattra\Rbac\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpFoundation\Response;
+use Vattra\Rbac\Middleware\Concerns\DeniesAccess;
+use Vattra\Rbac\RbacManager;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, string ...$roles)
+    use DeniesAccess;
+
+    /** Usage: rbac.role:admin,editor  or  rbac.role:admin|editor */
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        if (! $request->user() || ! $request->user()->hasRole(...$roles)) {
-            throw new HttpException(403, 'Role not allowed.');
+        $user = $request->user();
+
+        if ($user === null) {
+            $this->denyGuest($request);
         }
-        return $next($request);
+
+        if (! $this->usesRbac($user)) {
+            $this->deny('Role not allowed.');
+        }
+
+        if (
+            $user->hasRole(RbacManager::superAdminRole())
+            || $user->hasRole(...RbacManager::parseList($roles))
+        ) {
+            return $next($request);
+        }
+
+        $this->deny('Role not allowed.');
     }
 }

@@ -1,42 +1,96 @@
 <?php
 
-// config/rbac.php
-return [
-    'super_admin_role' => 'super_admin',
-    'user_table' => 'users',
-    'user_model' => env('RBAC_USER_MODEL', App\Models\User::class),
+declare(strict_types=1);
 
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Special role names
+    |--------------------------------------------------------------------------
+    | super_admin bypasses every permission and role check. admin is only used
+    | by the `is_admin` gate and by the "*except_rbac" permission wildcard.
+    */
+    'super_admin_role' => 'super_admin',
+    'admin_role' => 'admin',
+
+    /*
+    |--------------------------------------------------------------------------
+    | User model & keys
+    |--------------------------------------------------------------------------
+    | user_model:       null falls back to auth.providers.users.model.
+    | user_table:       table the pivot foreign keys point at.
+    | user_foreign_key: pivot column holding the user key.
+    | user_key_type:    "id" (bigint), "uuid" or "ulid".
+    */
+    'user_model' => env('RBAC_USER_MODEL'),
+    'user_table' => 'users',
+    'user_foreign_key' => 'user_id',
+    'user_key_type' => 'id',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Table names
+    |--------------------------------------------------------------------------
+    */
+    'tables' => [
+        'roles' => 'roles',
+        'permissions' => 'permissions',
+        'role_permissions' => 'role_permissions',
+        'user_roles' => 'user_roles',
+        'user_permissions' => 'user_permissions',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Persistent cache (optional)
+    |--------------------------------------------------------------------------
+    | When enabled, each user's resolved roles/permissions and the list of
+    | registered permission names are cached. The cache is flushed
+    | automatically when roles, permissions or assignments change.
+    */
+    'cache' => [
+        'enabled' => env('RBAC_CACHE', false),
+        'ttl' => 3600, // seconds
+        'store' => null, // null = default cache store
+        'prefix' => 'rbac',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Gates & middleware
+    |--------------------------------------------------------------------------
+    | register_role_gates: define an `is_<role>` gate for every role below.
+    | legacy_middleware_aliases: also register the old `role`/`permission`
+    |                            aliases (they clash with other packages).
+    */
+    'register_role_gates' => true,
+    'legacy_middleware_aliases' => false,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Roles
+    |--------------------------------------------------------------------------
+    | permissions: '*'            => every permission
+    |              '*except_rbac' => every permission except
+    |                                rbac_protected_permissions
+    |              [ ... ]        => explicit list
+    | locked:      true => the role cannot be deleted.
+    | Permission names follow "<action>_<group>", e.g. view_posts.
+    */
     'roles' => [
-        'super_admin'       => ['type' => 'system', 'locked' => true, 'permissions' => '*'],
-        'admin'             => ['type' => 'admin',  'permissions' => '*except_rbac'],
-        'sales_rep'         => ['type' => 'staff',  'permissions' => [
-            'view_clients','store_clients','update_clients',
-            'view_quotations','store_quotations','update_quotations',
-            'view_sales_orders','store_sales_orders','update_sales_orders',
-            'view_products','view_invoices',
+        'super_admin' => ['type' => 'system', 'locked' => true, 'permissions' => '*'],
+        'admin' => ['type' => 'admin', 'locked' => true, 'permissions' => '*except_rbac'],
+        'editor' => ['type' => 'staff', 'permissions' => [
+            'view_posts', 'store_posts', 'update_posts', 'destroy_posts',
+            'view_comments', 'update_comments', 'destroy_comments',
         ]],
-        'inventory_manager' => ['type' => 'staff',  'permissions' => [
-            'view_products','store_products','update_products','destroy_products',
-            'view_stock_movements','store_stock_movements',
-            'view_sales_orders',
-        ]],
-        'project_manager'   => ['type' => 'staff',  'permissions' => [
-            'view_projects','store_projects','update_projects',
-            'view_project_phases','update_project_phases',
-            'view_clients','view_quotations',
-        ]],
-        'finance_officer'   => ['type' => 'staff',  'permissions' => [
-            'view_invoices','store_invoices','update_invoices','destroy_invoices',
-            'view_sales_orders','view_clients',
-        ]],
-        'client'            => ['type' => 'user', 'permissions' => [
-            // self-scoped permissions — enforced by policies, not gates alone
-            'portal_view_own_quotations','portal_view_own_orders',
-            'portal_view_own_invoices','portal_view_own_projects',
+        'user' => ['type' => 'user', 'permissions' => [
+            'view_posts', 'store_comments',
         ]],
     ],
 
     'rbac_protected_permissions' => [
-        'view_roles','store_roles','update_roles','destroy_roles','assign_permissions',
+        'view_roles', 'store_roles', 'update_roles', 'destroy_roles', 'assign_permissions',
     ],
 ];

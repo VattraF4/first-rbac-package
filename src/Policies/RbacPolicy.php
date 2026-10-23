@@ -1,31 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Vattra\Rbac\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Vattra\Rbac\RbacManager;
 
 abstract class RbacPolicy
 {
     use HandlesAuthorization;
 
     /**
-     * Check if the user has the general permission to perform this action.
+     * The super admin bypasses every policy method. Guests are skipped
+     * because $user is non-nullable.
      */
-    public function before($user, $ability)
+    public function before(Authenticatable $user, string $ability): ?bool
     {
-        // Super admin bypasses all policies
-        if (method_exists($user, 'hasRole') && $user->hasRole('super_admin')) {
+        if (method_exists($user, 'hasRole') && $user->hasRole(RbacManager::superAdminRole())) {
             return true;
         }
+
+        return null;
     }
 
-    /**
-     * Helper: Check if user has permission for this module.
-     */
-    public function hasPermission($user, string $permission): bool
+    /** Helper: does the user hold this permission? */
+    public function hasPermission(?Authenticatable $user, string $permission): bool
     {
-        return method_exists($user, 'hasPermissionTo') 
-            ? $user->hasPermissionTo($permission) 
-            : false;
+        return $user !== null
+            && method_exists($user, 'hasPermissionTo')
+            && $user->hasPermissionTo($permission);
     }
 }

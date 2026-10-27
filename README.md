@@ -16,7 +16,7 @@ Fast, config-driven role-based access control for Laravel 10, 11, 12 and 13.
 ```bash
 composer require vattra/laravel-rbac
 
-php artisan vendor:publish --tag=rbac-config   # optional but recommended
+php artisan vendor:publish --tag=rbac   # optional but recommended
 php artisan migrate                            # migrations load from the package
 php artisan rbac:install                       # sync roles + permissions from config
 php artisan rbac:check                         # verify the setup

@@ -24,7 +24,7 @@ class RbacServiceProvider extends ServiceProvider
         $this->app->singleton(PermissionRegistrar::class);
 
         // Scoped: reset between requests under Octane / queue workers.
-        $this->app->scoped(RbacManager::class, fn ($app) => new RbacManager(
+        $this->app->scoped(RbacManager::class, fn($app) => new RbacManager(
             $app->make(PermissionRegistrar::class)
         ));
         $this->app->alias(RbacManager::class, 'rbac');
@@ -40,7 +40,7 @@ class RbacServiceProvider extends ServiceProvider
             __DIR__ . '/../database/migrations' => database_path('migrations'),
         ], 'rbac-migrations');
 
-        // "rbac" publishes everything (kept from earlier versions)
+        // Running: php artisan vendor:publish --tag=rbac
         $this->publishes([
             __DIR__ . '/../config/rbac.php' => config_path('rbac.php'),
             __DIR__ . '/../database/migrations' => database_path('migrations'),
